@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.6/flatly/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+    <title>New York Times Search</title>
+</head>
+
+<body class="font-family: 'Oswald', sans-serif; text-secondary">
+    <div class="container">
+        <div class="row">
+            <div style="background-color: rgb(11, 11, 71); color: white;" class="jumbotron rounded shadow text-center">
+                <h1 style="font-size: 50px;"><i class="fa fa-newspaper-o"></i> New York Times Search</h1>
+            </div>
+        </div>
+
+        <div class="row rounded shadow">
+            <div class="col-md">
+                <div class="panel panel-primary">
+                    <div class="panel-heading" style="background-color: rgb(11, 11, 71);">
+                        <h5 class="panel-title"><strong><i class="fa fa-table"></i> Search Parameters</h5></strong>
+                    </div>
+
+                    <div class="panel-body">
+                        <form>
+                            <div class="form-group">
+                                <label>Search Term:</label>
+                                <input type="text" class="form-control" id="search-item">
+                            </div>
+                            <div class="form-group">
+                                <label>Number of Records to Retrieve:</label>
+                                <select class="form-control" id="number-retrieve">
+                                    <option>1</option>
+                                    <option>5</option>
+                                    <option>10</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Start Year (Optional):</label>
+                                <input type="text" class="form-control" id="start-year">
+                            </div>
+                            <div class="form-group">
+                                <label>End Year (Optional):</label>
+                                <input type="text" class="form-control" id="end-year">
+                            </div>
+                                <button id="search-btn" class="btn btn-outline-secondary"><i class="fa fa-search"></i> Search</button>
+                                <button id="clear-btn" class="btn btn-outline-secondary"><i class="fa fa-trash"></i> Clear Results</button>
+                            
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="row rounded shadow">
+            <div class="col-md">
+                <div class="panel panel-primary">
+                    <div class="panel-heading" style="background-color: rgb(11, 11, 71);">
+                        <h5 class="panel-title"><strong><i class="fa fa-list-alt"></i> Top Articles</h5></strong>
+                    </div>
+                    <div class="panel-body">
+                        <div id="display-here">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <div class="container text-secondary text-center">
+            <hr>
+            Made with lots and lots of <i class="fa fa-heart"></i>
+        </div>
+
+    </footer>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+
+
+        $("#search-btn").on('click', function (event) {
+            event.preventDefault();
+            var url="";
+            var searchItem = $("#search-item").val();
+            var numberRetrieve = $("#number-retrieve").val();
+            var startYear = $("#start-year").val();
+            var endYear = $("#end-year").val();
+            if (startYear === "" && endYear != ""){
+                url = "https://api.nytimes.com/svc/search/v2/articlesearch.json?end_date=" + endYear + "1231&q=" + searchItem + "&api-key=BV5QjwCRCripwfA7dEB8MGPlmQcPhp95&limit=10";
+            }
+            if (startYear != "" && endYear === ""){
+                url = "https://api.nytimes.com/svc/search/v2/articlesearch.json?begin_date=" + startYear +"0101&q=" + searchItem + "&api-key=BV5QjwCRCripwfA7dEB8MGPlmQcPhp95&limit=10";
+            }
+            if (startYear === "" && endYear === ""){
+                url = "https://api.nytimes.com/svc/search/v2/articlesearch.json?q=" + searchItem + "&api-key=BV5QjwCRCripwfA7dEB8MGPlmQcPhp95&limit=10";
+            }
+            if (startYear != "" && endYear != ""){
+            url = "https://api.nytimes.com/svc/search/v2/articlesearch.json?begin_date=" + startYear + "0101&end_date=" + endYear + "1231&q=" + searchItem + "&api-key=BV5QjwCRCripwfA7dEB8MGPlmQcPhp95&limit=10";
+        }
+            console.log(url);
+
+            $.ajax({
+                url,
+                method: "GET"
+            }).then(function (resp) {
+                console.log(resp);
+                const result = resp.response.docs;
+                const articalDiv = $("<div>");
+                for (let i = 0; i < numberRetrieve; i++) {
+                    const singleDiv = $("<div>");
+                   const pubDate = $("<p>").text("Published Date: " + result[i].pub_date);
+                    const name = $("<h4>").text(i+1 +". " + result[i].headline.main);
+                    const link = $("<a>").attr('href', result[i].web_url).attr("target", "_blank");
+                    link.text(result[i].web_url);
+                    singleDiv.addClass("jumbotron");
+                    singleDiv.append(name, pubDate, link);
+                    articalDiv.append(singleDiv);
+                    
+                }
+                const hrLine = $("<hr>");
+                $("#display-here").prepend(hrLine, articalDiv);
+            })
+        })
+
+        $("#clear-btn").on('click', function (event) {
+            event.preventDefault();
+            $("#display-here").empty();
+        })
+    </script>
+</body>
+
+</html>
